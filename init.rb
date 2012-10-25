@@ -1,16 +1,23 @@
 require 'redmine'
 
-# Taken from lib/redmine.rb
-if RUBY_VERSION < '1.9'
-  require 'faster_csv'
+## Taken from lib/redmine.rb
+#if RUBY_VERSION < '1.9'
+#  require 'faster_csv'
+#else
+#  require 'csv'
+#  FCSV = CSV
+#end
+
+if Rails::VERSION::MAJOR < 3
+  require 'dispatcher'
+  object_to_prepare = Dispatcher
 else
-  require 'csv'
-  FCSV = CSV
+  object_to_prepare = Rails.configuration
+  # if redmine plugins were railties:
+  # object_to_prepare = config
 end
 
-require 'dispatcher'
-Dispatcher.to_prepare :timesheet_plugin do
-
+object_to_prepare.to_prepare do
   require_dependency 'principal'
   require_dependency 'user'
   User.send(:include, TimesheetPlugin::Patches::UserPatch)
@@ -24,7 +31,6 @@ Dispatcher.to_prepare :timesheet_plugin do
     # TimeEntryActivity is not available
   end
 end
-
 
 unless Redmine::Plugin.registered_plugins.keys.include?(:timesheet_plugin)
   Redmine::Plugin.register :timesheet_plugin do
@@ -48,13 +54,12 @@ unless Redmine::Plugin.registered_plugins.keys.include?(:timesheet_plugin)
 
     menu(:top_menu,
          :timesheet,
-         {:controller => 'timesheet', :action => 'index'},
+         {:controller => :timesheet, :action => :index},
          :caption => :timesheet_title,
          :if => Proc.new {
            User.current.allowed_to?(:see_project_timesheets, nil, :global => true) ||
            User.current.allowed_to?(:view_time_entries, nil, :global => true) ||
            User.current.admin?
          })
-
   end
 end
