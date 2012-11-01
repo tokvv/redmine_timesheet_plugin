@@ -33,6 +33,7 @@ class TimesheetController < ApplicationController
     if params && params[:timesheet]
       @timesheet = Timesheet.new( params[:timesheet] )
     else
+      puts "\n\n----------------------------  Redirected! ... :( ------------------------------------\n\n"
       redirect_to :action => 'index'
       return
     end
