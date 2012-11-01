@@ -127,29 +127,29 @@ class Timesheet
   end
 
   def to_csv
-    returning '' do |out|
-      FCSV.generate out do |csv|
-        csv << csv_header
+    out = "";
+    FCSV.generate out do |csv|
+      csv << csv_header
 
-        # Write the CSV based on the group/sort
-        case sort
-        when :user, :project
-          time_entries.sort.each do |entryname, entry|
-            entry[:logs].each do |e|
-              csv << time_entry_to_csv(e)
-            end
+      # Write the CSV based on the group/sort
+      case sort
+      when :user, :project
+        time_entries.sort.each do |entryname, entry|
+          entry[:logs].each do |e|
+            csv << time_entry_to_csv(e)
           end
-        when :issue
-          time_entries.sort.each do |project, entries|
-            entries[:issues].sort {|a,b| a[0].id <=> b[0].id}.each do |issue, time_entries|
-              time_entries.each do |e|
-                csv << time_entry_to_csv(e)
-              end
+        end
+      when :issue
+        time_entries.sort.each do |project, entries|
+          entries[:issues].sort {|a,b| a[0].id <=> b[0].id}.each do |issue, time_entries|
+            time_entries.each do |e|
+              csv << time_entry_to_csv(e)
             end
           end
         end
       end
     end
+    out
   end
 
   def self.viewable_users
