@@ -8,6 +8,17 @@ function selectAllOptions(element) {
   }
 }
 
+$(document).ready(function() {
+    $('#select_timesheet_period_type_2').click(function() {
+        $('#timesheet_period_type_2').attr('checked','checked');
+    });
+
+    $('#select_timesheet_period_type_1').focus(function() {
+        $('#timesheet_period_type_1').attr('checked','checked');
+    });
+});
+
+/*
 Event.observe(window, 'load',
   function() { 
     $$('label.select_all').each(function(element) {
@@ -15,3 +26,4 @@ Event.observe(window, 'load',
     });
   }
 );
+*/
