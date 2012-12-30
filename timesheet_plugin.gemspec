@@ -4,14 +4,13 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{timesheet_plugin}
+  s.name = %q{redmine_timesheet_plugin}
   s.version = "0.6.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["Eric Davis"]
+  s.authors = ["Eric Davis", "Hisham Malik"]
   s.date = %q{2010-03-18}
   s.description = %q{A plugin to show and filter timelogs across all projects in Redmine.}
-  s.email = %q{edavis@littlestreamsoftware.com}
   s.extra_rdoc_files = [
     "README.rdoc"
   ]

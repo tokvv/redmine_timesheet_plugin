@@ -20,10 +20,10 @@ end
 object_to_prepare.to_prepare do
   require_dependency 'principal'
   require_dependency 'user'
-  User.send(:include, TimesheetPlugin::Patches::UserPatch)
+  User.send(:include, RedmineTimesheetPlugin::Patches::UserPatch)
 
   require_dependency 'project'
-  Project.send(:include, TimesheetPlugin::Patches::ProjectPatch)
+  Project.send(:include, RedmineTimesheetPlugin::Patches::ProjectPatch)
   # Needed for the compatibility check
   begin
     require_dependency 'time_entry_activity'
@@ -32,13 +32,13 @@ object_to_prepare.to_prepare do
   end
 end
 
-unless Redmine::Plugin.registered_plugins.keys.include?(:timesheet_plugin)
-  Redmine::Plugin.register :timesheet_plugin do
-    name 'Timesheet Plugin'
-    author 'Eric Davis of Little Stream Software'
+unless Redmine::Plugin.registered_plugins.keys.include?(:redmine_timesheet_plugin)
+  Redmine::Plugin.register :redmine_timesheet_plugin do
+    name 'Redmine Timesheet Plugin'
+    author 'Hisham Malik'
     description 'This is a Timesheet plugin for Redmine to show timelogs for all projects'
-    url 'https://projects.littlestreamsoftware.com/projects/redmine-timesheet'
-    author_url 'http://www.littlestreamsoftware.com'
+    url 'http://github.com/techarete/redmine_timesheet_plugin'
+    author_url 'https://github.com/hishammalik'
 
     version '0.6.0'
     requires_redmine :version_or_higher => '0.9.0'

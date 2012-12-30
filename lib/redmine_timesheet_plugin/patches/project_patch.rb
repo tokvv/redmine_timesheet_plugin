@@ -1,4 +1,4 @@
-module TimesheetPlugin
+module RedmineTimesheetPlugin
   module Patches
     module ProjectPatch
       def self.included(base)
@@ -16,7 +16,7 @@ module TimesheetPlugin
 
                 # Principal#members gets all projects, but #memberships will only
                 # get the active ones
-                if Setting.plugin_timesheet_plugin['project_status'] == 'all'
+                if Setting.plugin_redmine_timesheet_plugin['project_status'] == 'all'
                   project_ids = user.members.collect{|m| m.project_id}
                 else
                   project_ids = user.memberships.collect{|m| m.project_id}
@@ -45,7 +45,7 @@ module TimesheetPlugin
 
                 # Principal#members gets all projects, but #memberships will only
                 # get the active ones
-                if Setting.plugin_timesheet_plugin['project_status'] == 'all'
+                if Setting.plugin_redmine_timesheet_plugin['project_status'] == 'all'
                   project_ids = user.members.collect{|m| m.project_id}
                 else
                   project_ids = user.memberships.collect{|m| m.project_id}
