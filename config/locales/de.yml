@@ -8,3 +8,9 @@ de:
   timesheet_showing_users: 'zeige Zeit für: '
   timesheet_permalink: '(Permalink zu diesem Stundenzettel)'
   timesheet_group_by: Gruppiere nach
+  label_show_project_status: "Projektstatus:"
+  text_active_projects: "Aktiv"
+  text_all_projects: "alle(aktiv und archiviert)"
+  label_user_status: "zeige Mitglieder mit dem Status"
+  text_active_users: "nur aktive"
+  text_all_users: "alle"
