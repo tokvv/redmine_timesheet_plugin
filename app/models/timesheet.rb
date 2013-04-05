@@ -128,7 +128,7 @@ class Timesheet
 
   def to_csv
     out = "";
-    FCSV.generate(:encoding => 'u') out do |csv|
+    FCSV.generate(out, :encoding => 'u') do |csv|
       csv << csv_header
 
       # Write the CSV based on the group/sort
