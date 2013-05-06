@@ -1,11 +1,9 @@
 = Redmine Timesheet plugin
+Show and filter timelog entries across all projects in Redmine.
 
-Show and filter timelogs across all projects in Redmine.
-
-This plugin is a fork of {GitHub}[https://github.com/edavis10/redmine-timesheet-plugin] originally developed by Eric Davis. It has been updated to be Rails 3/Redmine 2+ compatible. 
+This plugin is a fork of {GitHub}[https://github.com/techarete/redmine_timesheet_plugin].
 
 == Features
-
 * Filtering and sum of timelogs by:
   * Date range
   * Projects
@@ -22,24 +20,16 @@ This plugin is a fork of {GitHub}[https://github.com/edavis10/redmine-timesheet-
 * User configurable precision for hours
 * CSV exports
 
-== Getting the plugin
-
-A copy can be gotton from {GitHub}[http://github.com/techarete/redmine_timesheet_plugin]
-
 == Installation and Setup
 
-1. In your redmine root directory, run the command: `git clone http://github.com/techarete/redmine_timesheet_plugin plugins/redmine_timesheet_plugin`
+1. In your redmine plugins directory, run the command: `git clone http://github.com/Intera/redmine_timesheet_plugin`
 2. Restart web server
 3. Login and click the Timesheet Link in the top left menu
 
 == Upgrade
-
 1. Open a shell to your Redmine's plugins/redmine_timesheet_plugin folder
 2. Update your Git copy with `git pull`
-3. Restart your Redmine
+3. Restart Redmine
 
 == License
-
 This plugin is licensed under the GNU GPL v2.  See LICENSE.txt and GPL.txt for details.
-
-
