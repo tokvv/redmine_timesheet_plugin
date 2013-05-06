@@ -4,6 +4,7 @@
     <td align="center"><%= time_entry.user.name %></td>
     <td align="center"><%= time_entry.activity.name %></td>
     <td align="center"><%= time_entry.project.name %></td>
+    <td align="center"><%= time_entry.issue.fixed_version if time_entry.issue %></td>
     <td align="center">
       <% if time_entry.issue %>
       <div class="tooltip">
