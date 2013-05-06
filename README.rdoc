@@ -1,7 +1,13 @@
 = Redmine Timesheet plugin
+
 Show and filter timelog entries across all projects in Redmine.
 
-This plugin is a fork of {GitHub}[https://github.com/techarete/redmine_timesheet_plugin].
+This is a Redmine 2+ compatible version of plugin originally created by Eric Davis to generate timesheets from timelogs.
+This Version is a fork of {techarete/redmine_timesheet_plugin}[https://github.com/techarete/redmine_timesheet_plugin].
+
+Current modifications are
+* The addition of a version field in the report table
+* Day total hour summaries
 
 == Features
 * Filtering and sum of timelogs by:
