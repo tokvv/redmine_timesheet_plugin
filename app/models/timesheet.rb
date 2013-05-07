@@ -51,7 +51,7 @@ class Timesheet
     if !options[:sort].nil? && options[:sort].respond_to?(:to_sym) && ValidSortOptions.keys.include?(options[:sort].to_sym)
       self.sort = options[:sort].to_sym
     else
-      self.sort = :user
+      self.sort = :project
     end
 
     self.date_from = options[:date_from] || Date.today.to_s
