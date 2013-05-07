@@ -1,5 +1,6 @@
 en:
   timesheet_title: Timesheet
+  timesheet_date_range_label: Period
   timesheet_date_from_label: From
   timesheet_date_to_label: To
   timesheet_project_label: Project
@@ -14,4 +15,3 @@ en:
   label_user_status: "Show users with the status of"
   text_active_users: "Active only"
   text_all_users: "All"
-
