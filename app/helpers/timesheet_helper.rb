@@ -64,9 +64,8 @@ module TimesheetHelper
 
   def project_options(timesheet)
     available_projects = timesheet.allowed_projects
-    selected_projects = timesheet.projects.collect(&:id)
-    selected_projects = available_projects.collect(&:id) if selected_projects.blank?
-
+    selected_projects = timesheet.projects
+    selected_projects = available_projects if selected_projects.blank?
     project_tree_options_for_select(available_projects, :selected => selected_projects)
   end
 
