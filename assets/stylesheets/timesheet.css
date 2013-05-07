@@ -53,5 +53,14 @@ label.select-all {
 }
 
 tr.total {
+	border-color: #ddd !important;
+	border-style: solid !important;
+	border-width: 0px !important;
+	border-top-width: 1px !important;
+	border-bottom-width: 1px;
+	height: 30px;
+}
+
+tr.total {
 	display: none;
 }
