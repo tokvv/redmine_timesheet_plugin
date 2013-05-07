@@ -51,3 +51,7 @@ label.select-all {
 #timesheet-form .radiobutton-label label {
 	display: inline;
 }
+
+tr.total {
+	display: none;
+}
