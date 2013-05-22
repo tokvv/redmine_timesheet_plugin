@@ -7,7 +7,10 @@ This Version is a fork of {techarete/redmine_timesheet_plugin}[https://github.co
 
 Current modifications are
 * The addition of a version field in the report table
-* Day total hour summaries
+* Print style
+* Day total hour summaries for the print style
+* Cleaned up form layout
+* Headers of multiselects select all elements. They also deselect all elements if all elements are selected
 
 == Features
 * Filtering and sum of timelogs by:
