@@ -1,4 +1,5 @@
 timesheet_title: Stundenzettel
+timesheet_date_range_label: Zeitraum
 timesheet_date_from_label: Von
 timesheet_date_to_label: Bis
 timesheet_project_label: Projekt

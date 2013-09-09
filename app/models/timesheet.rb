@@ -6,7 +6,7 @@ class Timesheet
   #   project.name => {:logs => [time entries], :users => [users shown in logs] }
   # project.name could be the parent project name also
   attr_accessor :time_entries
-  
+
   # Array of TimeEntry ids to fetch
   attr_accessor :potential_time_entry_ids
 
@@ -22,7 +22,7 @@ class Timesheet
     :free_period => 0,
     :default => 1
   }
-  
+
   def initialize(options = { })
     self.projects = [ ]
     self.time_entries = options[:time_entries] || { }
@@ -35,13 +35,13 @@ class Timesheet
         activity = TimeEntryActivity.find(activity_id)
         project_activities = TimeEntryActivity.all(:conditions => ['parent_id IN (?)', activity.id]) if activity.parent_id.nil?
         project_activities ||= []
-        
+
         [activity.id.to_i] + project_activities.collect(&:id)
       end.flatten.uniq.compact
     else
       self.activities =  TimeEntryActivity.all.collect { |a| a.id.to_i }
     end
-    
+
     unless options[:users].nil?
       self.users = options[:users].collect { |u| u.to_i }
     else
@@ -53,7 +53,7 @@ class Timesheet
     else
       self.sort = :project
     end
-    
+
     self.date_from = options[:date_from] || Date.today.to_s
     self.date_to = options[:date_to] || Date.today.to_s
 
@@ -128,7 +128,7 @@ class Timesheet
 
   def to_csv
     out = "";
-    FCSV.generate(out, :encoding => 'u') do |csv|
+    FCSV.generate(out, :encoding => 'u', :force_quotes => true) do |csv|
       csv << csv_header
 
       # Write the CSV based on the group/sort
@@ -158,12 +158,12 @@ class Timesheet
     else
       user_scope = User.active
     end
-    
+
     user_scope.select {|user|
       user.allowed_to?(:log_time, nil, :global => true)
     }
   end
-  
+
   protected
 
   def csv_header
@@ -173,6 +173,7 @@ class Timesheet
                 l(:label_member),
                 l(:label_activity),
                 l(:label_project),
+                l(:label_version),
                 l(:label_issue),
                 "#{l(:label_issue)} #{l(:field_subject)}",
                 l(:field_comments),
@@ -189,6 +190,7 @@ class Timesheet
                 time_entry.user.name,
                 time_entry.activity.name,
                 time_entry.project.name,
+                (time_entry.issue.fixed_version if time_entry.issue),
                 ("#{time_entry.issue.tracker.name} ##{time_entry.issue.id}" if time_entry.issue),
                 (time_entry.issue.subject if time_entry.issue),
                 time_entry.comments,
@@ -230,7 +232,7 @@ class Timesheet
     if extra_conditions
       conditions[0] = conditions.first + ' AND ' + extra_conditions
     end
-      
+
     Redmine::Hook.call_hook(:plugin_timesheet_model_timesheet_conditions, { :timesheet => self, :conditions => conditions})
     return conditions
   end
@@ -243,14 +245,14 @@ class Timesheet
 
   private
 
-  
+
   def time_entries_for_all_users(project)
     return project.time_entries.find(:all,
                                      :conditions => self.conditions(self.users),
                                      :include => self.includes,
                                      :order => "spent_on ASC")
   end
-  
+
   def time_entries_for_current_user(project)
     return project.time_entries.find(:all,
                                      :conditions => self.conditions(User.current.id),
@@ -258,7 +260,7 @@ class Timesheet
                                      :include => [:activity, :user, {:issue => [:tracker, :assigned_to, :priority]}],
                                      :order => "spent_on ASC")
   end
-  
+
   def issue_time_entries_for_all_users(issue)
     return issue.time_entries.find(:all,
                                    :conditions => self.conditions(self.users),
@@ -266,7 +268,7 @@ class Timesheet
                                    :include => [:activity, :user],
                                    :order => "spent_on ASC")
   end
-  
+
   def issue_time_entries_for_current_user(issue)
     return issue.time_entries.find(:all,
                                    :conditions => self.conditions(User.current.id),
@@ -274,17 +276,17 @@ class Timesheet
                                    :include => [:activity, :user],
                                    :order => "spent_on ASC")
   end
-  
+
   def time_entries_for_user(user, options={})
     extra_conditions = options.delete(:conditions)
-    
+
     return TimeEntry.find(:all,
                           :conditions => self.conditions([user], extra_conditions),
                           :include => self.includes,
                           :order => "spent_on ASC"
                           )
   end
-  
+
   def fetch_time_entries_by_project
     self.projects.each do |project|
       logs = []
@@ -304,11 +306,11 @@ class Timesheet
       else
         # Rest can see nothing
       end
-      
+
       # Append the parent project name
       if project.parent.nil?
         unless logs.empty?
-          self.time_entries[project.name] = { :logs => logs, :users => users } 
+          self.time_entries[project.name] = { :logs => logs, :users => users }
         end
       else
         unless logs.empty?
@@ -317,7 +319,7 @@ class Timesheet
       end
     end
   end
-  
+
   def fetch_time_entries_by_user
     self.users.each do |user_id|
       logs = []
@@ -334,20 +336,20 @@ class Timesheet
       else
         # Rest can see nothing
       end
-      
+
       unless logs.empty?
         user = User.find_by_id(user_id)
         self.time_entries[user.name] = { :logs => logs }  unless user.nil?
       end
     end
   end
-  
+
   #   project => { :users => [users shown in logs],
-  #                :issues => 
+  #                :issues =>
   #                  { issue => {:logs => [time entries],
   #                    issue => {:logs => [time entries],
   #                    issue => {:logs => [time entries]}
-  #     
+  #
   def fetch_time_entries_by_issue
     self.projects.each do |project|
       logs = []
@@ -369,19 +371,19 @@ class Timesheet
 
       logs.flatten! if logs.respond_to?(:flatten!)
       logs.uniq! if logs.respond_to?(:uniq!)
-      
+
       unless logs.empty?
         users << logs.collect(&:user).uniq.sort
 
-        
+
         issues = logs.collect(&:issue).uniq
         issue_logs = { }
         issues.each do |issue|
           issue_logs[issue] = logs.find_all {|time_log| time_log.issue == issue } # TimeEntry is for this issue
         end
-        
+
         # TODO: TE without an issue
-        
+
         self.time_entries[project] = { :issues => issue_logs, :users => users}
       end
     end

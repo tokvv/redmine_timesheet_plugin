@@ -1,6 +1,21 @@
 module TimesheetHelper
   include ProjectsHelper
 
+  def add_day_total? time_entries, time_entry_counter
+    (time_entry_counter == (time_entries.length - 1)) ||
+      (time_entries[time_entry_counter + 1].spent_on != time_entries[time_entry_counter].spent_on)
+  end
+
+  def calculate_day_total time_entries, time_entry_counter
+    date = time_entries[time_entry_counter].spent_on
+    hours_sum = 0
+    while (time_entry_counter >= 0) && (time_entries[time_entry_counter].spent_on == date)
+      hours_sum += time_entries[time_entry_counter].hours
+      time_entry_counter -= 1
+    end
+    number_with_precision(hours_sum, :precision => @precision)
+  end
+
   def showing_users(users)
     l(:timesheet_showing_users) + users.collect(&:name).join(', ')
   end
@@ -23,14 +38,14 @@ module TimesheetHelper
             :method => 'post',
             :class => 'icon icon-timesheet')
   end
-  
+
   def toggle_issue_arrows(issue_id)
     js = "toggleTimeEntries('#{issue_id}'); return false;"
-    
+
     return toggle_issue_arrow(issue_id, 'toggle-arrow-closed.gif', js, false) +
       toggle_issue_arrow(issue_id, 'toggle-arrow-open.gif', js, true)
   end
-  
+
   def toggle_issue_arrow(issue_id, image, js, hide=false)
     style = "display:none;" if hide
     style ||= ''
@@ -40,18 +55,17 @@ module TimesheetHelper
                 :class => "toggle-" + issue_id.to_s,
                 :style => style
                 )
-    
+
   end
-  
+
   def displayed_time_entries_for_issue(time_entries)
     time_entries.collect(&:hours).sum
   end
 
   def project_options(timesheet)
     available_projects = timesheet.allowed_projects
-    selected_projects = timesheet.projects.collect(&:id)
-    selected_projects = available_projects.collect(&:id) if selected_projects.blank?
-    
+    selected_projects = timesheet.projects
+    selected_projects = available_projects if selected_projects.blank?
     project_tree_options_for_select(available_projects, :selected => selected_projects)
   end
 
