@@ -35,10 +35,10 @@ end
 unless Redmine::Plugin.registered_plugins.keys.include?(:redmine_timesheet_plugin)
   Redmine::Plugin.register :redmine_timesheet_plugin do
     name 'Redmine Timesheet Plugin'
-    author 'Hisham Malik'
+    author 'Arkhitech'
     description 'This is a Timesheet plugin for Redmine to show timelogs for all projects'
-    url 'http://github.com/techarete/redmine_timesheet_plugin'
-    author_url 'https://github.com/hishammalik'
+    url 'http://github.com/arkhitech/redmine_timesheet_plugin'
+    author_url 'https://github.com/arkhitech'
 
     version '0.7.0'
     requires_redmine :version_or_higher => '0.9.0'
