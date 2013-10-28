@@ -52,7 +52,7 @@ class Timesheet
 
     unless options[:groups].nil?
       self.groups= options[:groups].collect { |g| g.to_i }
-      groups = Group.where(id: self.groups)
+      groups = Group.where(:id => self.groups)
       groups.each do |group|
         self.users += group.user_ids
       end
