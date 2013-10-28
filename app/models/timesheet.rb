@@ -346,7 +346,7 @@ class Timesheet
   end
   
   def fetch_time_entries_by_group
-    groups = Group.where(id: self.groups)
+    groups = Group.where(:id => self.groups)
     groups.each do |group|
       logs = []
       users = []
