@@ -51,6 +51,7 @@ unless Redmine::Plugin.registered_plugins.keys.include?(:redmine_timesheet_plugi
              }, :partial => 'settings/timesheet_settings')
 
     permission :see_project_timesheets, { }, :require => :member
+    permission :see_all_project_timesheets, { }, :require => :member
 
     menu(:top_menu,
          :timesheet,
