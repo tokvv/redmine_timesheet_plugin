@@ -22,21 +22,21 @@ module TimesheetHelper
 
   def permalink_to_timesheet(timesheet)
     link_to(l(:timesheet_permalink),
-            :controller => 'timesheet',
-            :action => 'report',
-            :timesheet => timesheet.to_param)
+      :controller => 'timesheet',
+      :action => 'report',
+      :timesheet => timesheet.to_param)
   end
 
   def link_to_csv_export(timesheet)
     link_to('CSV',
-            {
-              :controller => 'timesheet',
-              :action => 'report',
-              :format => 'csv',
-              :timesheet => timesheet.to_param
-            },
-            :method => 'post',
-            :class => 'icon icon-timesheet')
+      {
+        :controller => 'timesheet',
+        :action => 'report',
+        :format => 'csv',
+        :timesheet => timesheet.to_param
+      },
+      :method => 'post',
+      :class => 'icon icon-timesheet')
   end
 
   def toggle_issue_arrows(issue_id)
@@ -51,10 +51,10 @@ module TimesheetHelper
     style ||= ''
 
     content_tag(:span,
-                link_to_function(image_tag(image, :plugin => "redmine_timesheet_plugin"), js),
-                :class => "toggle-" + issue_id.to_s,
-                :style => style
-                )
+      link_to_function(image_tag(image, :plugin => "redmine_timesheet_plugin"), js),
+      :class => "toggle-" + issue_id.to_s,
+      :style => style
+    )
 
   end
 
@@ -75,7 +75,14 @@ module TimesheetHelper
   
   def group_options(timesheet)
     available_groups = Group.all
-    selected_groups = timesheet.groups
+    puts '*'*100
+    puts timesheet.groups.first.class
+    if timesheet.groups.first.class == Group
+      selected_groups = timesheet.groups.collect{|g| g.id}
+    else
+      selected_groups = timesheet.groups
+    end
+    selected_groups = available_groups.collect{|g| g.id} if selected_groups.blank?
     options_from_collection_for_select(available_groups, :id, :name, :selected => selected_groups)
   end
 
@@ -84,9 +91,9 @@ module TimesheetHelper
     selected_users = timesheet.users
 
     options_from_collection_for_select(available_users,
-                                       :id,
-                                       :name,
-                                       selected_users)
+      :id,
+      :name,
+      selected_users)
 
   end
 end
