@@ -457,6 +457,9 @@ class Timesheet
   
   def fetch_time_entries_by_date
 
+ 
+    #---------------------------------------------------
+    
     logs = []
 
     #           extra_conditions = 'GROUP_BY spent_on'
@@ -472,16 +475,16 @@ class Timesheet
         
       logs.each do |log|
         date=log.spent_on
-        logs2=[]
-        logs.each do |log2|
-          if log2.spent_on==date
-            logs2 << log2
+        logs_to_return=[]
+        logs.each do |log2return|
+          if log2return.spent_on==date
+            logs_to_return << log2return
           end
         end
      
            
 
-        self.time_entries[date] = { :logs => logs2 }
+        self.time_entries[date] = { :logs => logs_to_return }
       end
     end
 
