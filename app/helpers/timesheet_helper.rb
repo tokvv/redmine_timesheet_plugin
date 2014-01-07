@@ -57,6 +57,27 @@ module TimesheetHelper
     )
 
   end
+  
+    def toggle_issue_arrows_date(spent_on)
+    js = "toggleTimeEntriesdate('#{spent_on}'); return false;"
+
+    return toggle_issue_arrow_date(spent_on, 'toggle-arrow-closed.gif', js, false) +
+      toggle_issue_arrow(spent_on, 'toggle-arrow-open.gif', js, true)
+  end
+
+  def toggle_issue_arrow_date(spent_on, image, js, hide=false)
+    style = "display:none;" if hide
+    style ||= ''
+
+    content_tag(:span,
+      link_to_function(image_tag(image, :plugin => "redmine_timesheet_plugin"), js),
+      :class => "toggle-" + spent_on.to_s,
+      :style => style
+    )
+
+  end
+  
+  
 
   def displayed_time_entries_for_issue(time_entries)
     time_entries.collect(&:hours).sum
