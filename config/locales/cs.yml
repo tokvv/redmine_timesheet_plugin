@@ -8,3 +8,11 @@ cs:
   timesheet_showing_users: 'zobrazuji časy pro: '
   timesheet_permalink: '(Permalink k tomuto přehledu práce)'
   timesheet_group_by: Seskupit dle
+  label_show_project_status: "Projekty se statusem:"
+  text_active_projects: "Aktivní"
+  text_all_projects: "Vše (aktivní a archivované)"
+  label_user_status: "Zobrazit uživatele se statusem"
+  text_active_users: "Pouze aktivní"
+  text_all_users: "Vše"
+  timesheet_groups_label: Skupiny
+  
