@@ -96,15 +96,13 @@ module TimesheetHelper
   
   def group_options(timesheet)
     available_groups = Group.all
-    puts '*'*100
-    puts timesheet.groups.first.class
     if timesheet.groups.first.class == Group
       selected_groups = timesheet.groups.collect{|g| g.id}
     else
       selected_groups = timesheet.groups
     end
     selected_groups = available_groups.collect{|g| g.id} if selected_groups.blank?
-    options_from_collection_for_select(available_groups, :id, :name, :selected => selected_groups)
+    options_from_collection_for_select(available_groups, :id, :name, :selected =>timesheet.groups)
   end
 
   def user_options(timesheet)
