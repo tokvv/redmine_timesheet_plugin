@@ -4,8 +4,6 @@ class CreateEnumPrices < ActiveRecord::Migration
       t.references :enumerations
       t.float :price
     end
-    execute <<-SQL
-          ALTER TABLE `prices` ADD INDEX ( `enumerations_id` ) ;
-    SQL
+    add_index :prices, :enumerations_id
   end
 end
