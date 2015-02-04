@@ -345,7 +345,7 @@ class Timesheet
         end
       else
         unless logs.empty?
-          self.time_entries[project.parent + ' / ' + project] = { :logs => logs, :users => users }
+          self.time_entries[project.parent.to_s + ' / ' + project.to_s] = { :logs => logs, :users => users }
         end
       end
     end
