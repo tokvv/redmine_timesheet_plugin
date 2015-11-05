@@ -219,7 +219,7 @@ class Timesheet
       time_entry.spent_on,
       time_entry.user.name,
       time_entry.activity.name,
-      time_entry.project.name,
+      time_entry.project,
       (time_entry.issue.fixed_version if time_entry.issue),
       ("#{time_entry.issue.tracker.name} ##{time_entry.issue.id}" if time_entry.issue),
       (time_entry.issue.subject if time_entry.issue),
@@ -341,11 +341,11 @@ class Timesheet
       # Append the parent project name
       if project.parent.nil?
         unless logs.empty?
-          self.time_entries[project.name] = { :logs => logs, :users => users }
+          self.time_entries[project] = { :logs => logs, :users => users }
         end
       else
         unless logs.empty?
-          self.time_entries[project.parent.name + ' / ' + project.name] = { :logs => logs, :users => users }
+          self.time_entries[project.parent.to_s + ' / ' + project.to_s] = { :logs => logs, :users => users }
         end
       end
     end
