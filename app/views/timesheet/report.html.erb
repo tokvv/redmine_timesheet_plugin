@@ -31,35 +31,12 @@
 
         <span class="<%= cycle("odd", "even") %> issue-time-entry-<%= entryname -%>" style="display:none;">
           <%= render :partial => 'timesheet_group', :locals => {:entry => entry, :name => entryname, :total => @total[entryname] } %>
-        </span> 
-
+        </span>
         <%#*end%>
-        <script type="text/javascript">
-          function toggleTimeEntriesdate(entryname) {
-
-            $('.issue-time-entry-' + entryname).each(function() {
-              $(this).toggle();
-            })
-            $('.toggle-' + entryname).each(function() {
-              $(this).toggle();
-            })
-          }
-
-          /*
-           * Checks all the Time Entries under issue_id
-           */
-          function toggleTimeEntriesSelection(entryname) {
-            $$('.issue-time-entry-' + entryname).each(function(ele) {
-              toggleIssuesSelection(ele);
-            });
-          }
-
-        </script>
       <% else %>
         <%# Default to :project %>
         <h3><%= h entryname -%> (<%= h number_with_precision(@total[entryname], :precision => @precision) %> <%= h(l(:field_hours)) -%>) <%= showing_users(entry[:users]) %></h3> 
         <%= render :partial => 'timesheet_group', :locals => {:entry => entry, :name => entryname, :total => @total[entryname] } %>
-
       <% end
       end # each
     end # length

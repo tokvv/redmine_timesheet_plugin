@@ -39,45 +39,31 @@ module TimesheetHelper
       :class => 'icon icon-timesheet')
   end
 
+  def toggle_arrows(element, js_function)
+    js = "#{js_function}('#{element}');"
+
+    return toggle_arrow(element, 'toggle-arrow-closed.gif', js, false) +
+        toggle_arrow(element, 'toggle-arrow-open.gif', js, true)
+  end
+
+  def toggle_arrow(element, image, js, hide=false)
+    style = 'display:none;' if hide
+    style ||= ''
+
+    content_tag(:span,
+                link_to_function(image_tag(image, :plugin => "redmine_timesheet_plugin"), js),
+                :class => "toggle-" + element.to_s,
+                :style => style
+    )
+  end
+
   def toggle_issue_arrows(issue_id)
-    js = "toggleTimeEntries('#{issue_id}'); return false;"
-
-    return toggle_issue_arrow(issue_id, 'toggle-arrow-closed.gif', js, false) +
-      toggle_issue_arrow(issue_id, 'toggle-arrow-open.gif', js, true)
-  end
-
-  def toggle_issue_arrow(issue_id, image, js, hide=false)
-    style = "display:none;" if hide
-    style ||= ''
-
-    content_tag(:span,
-      link_to_function(image_tag(image, :plugin => "redmine_timesheet_plugin"), js),
-      :class => "toggle-" + issue_id.to_s,
-      :style => style
-    )
-
+    return toggle_arrows(issue_id, 'toggleTimeEntriesIssue')
   end
   
-    def toggle_issue_arrows_date(spent_on)
-    js = "toggleTimeEntriesdate('#{spent_on}'); return false;"
-
-    return toggle_issue_arrow_date(spent_on, 'toggle-arrow-closed.gif', js, false) +
-      toggle_issue_arrow(spent_on, 'toggle-arrow-open.gif', js, true)
+  def toggle_issue_arrows_date(spent_on)
+    return toggle_arrows(spent_on, 'toggleTimeEntriesDate')
   end
-
-  def toggle_issue_arrow_date(spent_on, image, js, hide=false)
-    style = "display:none;" if hide
-    style ||= ''
-
-    content_tag(:span,
-      link_to_function(image_tag(image, :plugin => "redmine_timesheet_plugin"), js),
-      :class => "toggle-" + spent_on.to_s,
-      :style => style
-    )
-
-  end
-  
-  
 
   def displayed_time_entries_for_issue(time_entries)
     time_entries.collect(&:hours).sum
