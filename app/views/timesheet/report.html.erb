@@ -23,9 +23,12 @@
       <% when :group %>
         <h3><%= h entryname -%> (<%= h number_with_precision(@total[entryname], :precision => @precision) %> <%= h(l(:field_hours)) -%>)</h3>
         <%= render :partial => 'timesheet_group', :locals => {:entry => entry, :name => entryname, :total => @total[entryname] } %>
+      <% when :tracker %>
+        <h3><%= h entryname -%> (<%= h number_with_precision(@total[entryname], :precision => @precision) %> <%= h(l(:field_hours)) -%>)</h3>
+        <%= render :partial => 'timesheet_group', :locals => {:entry => entry, :name => entryname, :total => @total[entryname] } %>
       <% when :date %>
         <%#*entry[:logs].each do |log|%>
-        <% logger.debug "#{'*'*100}\n ENTRYNAME > #{entryname.to_yaml} ENTRY #{entry[:logs][0].id}\n#{'*'*100}"%> 
+        <% logger.debug "#{'*'*100}\n ENTRYNAME > #{entryname.to_yaml} ENTRY #{entry[:logs][0].id}\n#{'*'*100}"%>
 
         <h3><%= toggle_issue_arrows_date(entryname) %><%= h entryname -%> (<%= h number_with_precision(@total[entryname], :precision => @precision) %> <%= h(l(:field_hours)) -%>)</h3>
 
@@ -35,7 +38,7 @@
         <%#*end%>
       <% else %>
         <%# Default to :project %>
-        <h3><%= h entryname -%> (<%= h number_with_precision(@total[entryname], :precision => @precision) %> <%= h(l(:field_hours)) -%>) <%= showing_users(entry[:users]) %></h3> 
+        <h3><%= h entryname -%> (<%= h number_with_precision(@total[entryname], :precision => @precision) %> <%= h(l(:field_hours)) -%>) <%= showing_users(entry[:users]) %></h3>
         <%= render :partial => 'timesheet_group', :locals => {:entry => entry, :name => entryname, :total => @total[entryname] } %>
       <% end
       end # each

@@ -44,6 +44,10 @@
           <%= select_tag 'timesheet[groups][]', group_options(@timesheet), { :multiple => true, :size => @list_size} %>
         </div>
       <% end %>
+      <div class="timesheet-trackers">
+        <label for="timesheet_trackers_" class="select-all"><%= l(:label_tracker_plural)%></label>
+        <%= select_tag 'timesheet[trackers][]', tracker_options(@timesheet), { :multiple => true, :size => @list_size} %>
+      </div>
       <%= call_hook(:plugin_timesheet_view_timesheet_form, { :timesheet => @timesheet, :params => params, :list_size => @list_size }) %>
       <div class="form-actions">
         <%= submit_tag l(:button_apply),:class => 'button-small' -%>

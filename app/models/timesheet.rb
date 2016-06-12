@@ -1,5 +1,6 @@
 class Timesheet
-  attr_accessor :date_from, :date_to, :projects, :activities, :users, :groups, :allowed_projects, :period, :period_type
+  attr_accessor :date_from, :date_to, :projects, :activities, :users, :groups, :trackers,
+    :allowed_projects, :period, :period_type
 
   # Time entries on the Timesheet in the form of:
   #   project.name => {:logs => [time entries], :users => [users shown in logs] }
@@ -18,6 +19,7 @@ class Timesheet
     :user => 'User',
     :issue => 'Issue',
     :group => 'Group',
+    :tracker => 'Tracker',
     :date => 'Date'
   }
 
@@ -32,7 +34,8 @@ class Timesheet
     self.potential_time_entry_ids = options[:potential_time_entry_ids] || [ ]
     self.allowed_projects = options[:allowed_projects] || [ ]
     self.groups = [ ]
-            
+    self.trackers = [ ]
+
     unless options[:activities].nil?
       self.activities = options[:activities].collect do |activity_id|
         # Include project-overridden activities
@@ -64,7 +67,16 @@ class Timesheet
         self.groups= Group.all
       end
     end
-    
+
+    unless options[:trackers].nil?
+      self.trackers = options[:trackers].collect do |tracker_id|
+        tracker = Tracker.find(tracker_id)
+        tracker.id if tracker
+      end.flatten.uniq.compact
+    else
+      self.trackers =  Tracker.all.collect { |a| a.id.to_i }
+    end
+
     if !options[:sort].nil? && options[:sort].respond_to?(:to_sym) && ValidSortOptions.keys.include?(options[:sort].to_sym)
       self.sort = options[:sort].to_sym
     else
@@ -95,6 +107,8 @@ class Timesheet
       fetch_time_entries_by_issue
     when :group
       fetch_time_entries_by_group
+    when :tracker
+      fetch_time_entries_by_tracker
     when :date
       fetch_time_entries_by_date
     else
@@ -201,6 +215,7 @@ class Timesheet
       '#',
       l(:label_date),
       l(:label_member),
+      l(:label_tracker),
       l(:label_activity),
       l(:label_project),
       l(:label_version),
@@ -218,6 +233,7 @@ class Timesheet
       time_entry.id,
       time_entry.spent_on,
       time_entry.user.name,
+      time_entry.issue.tracker.name,
       time_entry.activity.name,
       time_entry.project,
       (time_entry.issue.fixed_version if time_entry.issue),
@@ -232,24 +248,26 @@ class Timesheet
 
   # Array of users to find
   # String of extra conditions to add onto the query (AND)
-  def conditions(users, extra_conditions=nil)
+  def conditions(users, trackers, extra_conditions=nil)
     if self.potential_time_entry_ids.empty?
       if self.date_from.present? && self.date_to.present?
-        conditions = ["spent_on >= (:from) AND spent_on <= (:to) AND #{TimeEntry.table_name}.project_id IN (:projects) AND user_id IN (:users) AND activity_id IN (:activities)",
+        conditions = ["spent_on >= (:from) AND spent_on <= (:to) AND #{TimeEntry.table_name}.project_id IN (:projects) AND user_id IN (:users) AND activity_id IN (:activities) AND tracker_id IN (:trackers)",
           {
             :from => self.date_from,
             :to => self.date_to,
             :projects => self.projects,
             :activities => self.activities,
             :groups => self.groups,
+            :trackers => trackers,
             :users => users
           }]
       else # All time
-        conditions = ["#{TimeEntry.table_name}.project_id IN (:projects) AND user_id IN (:users) AND activity_id IN (:activities)",
+        conditions = ["#{TimeEntry.table_name}.project_id IN (:projects) AND user_id IN (:users) AND activity_id IN (:activities) AND tracker_id IN (:trackers)",
           {
             :projects => self.projects,
             :activities => self.activities,
             :groups => self.groups,
+            :trackers => trackers,
             :users => users
           }]
       end
@@ -279,46 +297,65 @@ class Timesheet
 
 
   def time_entries_for_all_users(project)
-    return project.time_entries.includes(self.includes).
-      where(self.conditions(self.users)).
+    return project.time_entries.includes(self.includes + [{:issue => [:tracker]}]).
+      joins(:issue).
+      where(self.conditions(self.users, self.trackers)).
       order('spent_on ASC')
   end
-  
+
   def time_entries_for_all_users_in_group(group)
-    return TimeEntry.includes(self.includes).
-      where(self.conditions(group.user_ids)).
+    return TimeEntry.includes(self.includes + [{:issue => [:tracker]}]).
+      joins(:issue).
+      where(self.conditions(group.user_ids, self.trackers)).
       order('spent_on ASC')
-  end 
-  
+  end
+
+  def time_entries_for_all_users_in_tracker(tracker)
+    return TimeEntry.includes(self.includes + [{:issue => [:tracker]}]).
+      joins(:issue).
+      where(self.conditions(self.users, tracker)).
+      order('spent_on ASC')
+  end
+
   def time_entries_for_current_user(project)
     return project.time_entries.
       includes(self.includes + [:activity, :user, {:issue => [:tracker, :assigned_to, :priority]}]).
-      where(self.conditions(User.current.id)).
+      joins(:issue).
+      where(self.conditions(User.current.id, self.trackers)).
+      order('spent_on ASC')
+  end
+
+  def time_entries_for_current_user_in_tracker(tracker)
+    return TimeEntry.includes(self.includes + [:activity, :user, {:issue => [:tracker, :assigned_to, :priority]}]).
+      joins(:issue).
+      where(self.conditions(User.current.id, tracker)).
       order('spent_on ASC')
   end
 
   def issue_time_entries_for_all_users(issue)
     return issue.time_entries.includes(self.includes + [:activity, :user]).
-      where(self.conditions(self.users)).
+      joins(:issue).
+      where(self.conditions(self.users, self.trackers)).
       order('spent_on ASC')
   end
 
   def issue_time_entries_for_current_user(issue)
     return issue.time_entries.includes(self.includes + [:activity, :user]).
-      where(self.conditions(User.current.id)).
+      joins(:issue).
+      where(self.conditions(User.current.id, self.trackers)).
       order('spent_on ASC')
   end
 
-  def time_entries_for_user(user, options={})
+  def time_entries_for_user(user, trackers, options={})
     extra_conditions = options.delete(:conditions)
 
     return TimeEntry.includes(self.includes).
-      where(self.conditions([user], extra_conditions)).
+      joins(:issue).
+      where(self.conditions([user], trackers, extra_conditions)).
       order('spent_on ASC')
   end
 
   def fetch_time_entries_by_project
-    puts self.projects
     self.projects.each do |project|
       logs = []
       users = []
@@ -372,20 +409,20 @@ class Timesheet
       end
     end
   end
- 
+
   def fetch_time_entries_by_user
     self.users.each do |user_id|
       logs = []
       if User.current.admin?
         # Administrators can see all time entries
-        logs = time_entries_for_user(user_id)
+        logs = time_entries_for_user(user_id, self.trackers)
       elsif User.current.id == user_id
         # Users can see their own their time entries
-        logs = time_entries_for_user(user_id)
+        logs = time_entries_for_user(user_id, self.trackers)
       elsif User.current.allowed_to_on_single_potentially_archived_project?(:see_project_timesheets, nil, :global => true)
         # User can see project timesheets in at least once place, so
         # fetch the user timelogs for those projects
-        logs = time_entries_for_user(user_id, :conditions => Project.allowed_to_condition(User.current, :see_project_timesheets))
+        logs = time_entries_for_user(user_id, self.trackers, :conditions => Project.allowed_to_condition(User.current, :see_project_timesheets))
       else
         # Rest can see nothing
       end
@@ -397,7 +434,34 @@ class Timesheet
     end
   end
   
-  
+
+  def fetch_time_entries_by_tracker
+    trackers = Tracker.where(:id => self.trackers)
+    trackers.each do |tracker|
+      logs = []
+      users = []
+      if User.current.admin?
+        # Administrators can see all time entries
+        logs = time_entries_for_all_users_in_tracker(tracker.id)
+      else
+        # Users with the Role and correct permission can see all time entries
+        logs1 = time_entries_for_all_users_in_tracker(tracker.id).select do |te|
+          project = Project.find(te.project_id)
+          User.current.allowed_to_on_single_potentially_archived_project?(:see_project_timesheets, project)
+        end
+        # Users with permission to see their time entries
+        logs2 = time_entries_for_current_user_in_tracker(tracker.id).select do |te|
+          project = Project.find(te.project_id)
+          User.current.allowed_to_on_single_potentially_archived_project?(:view_time_entries, project)
+        end
+        logs = logs1 + logs2
+      end
+      unless logs.empty?
+        users = logs.collect(&:user).uniq.sort
+        self.time_entries[tracker.name] = { :logs => logs, :users => users }
+      end
+    end
+  end
 
 
   #   project => { :users => [users shown in logs],
@@ -454,7 +518,7 @@ class Timesheet
     logs = []
 
     #           extra_conditions = 'GROUP_BY spent_on'
-    logs=TimeEntry.includes(self.includes).where(self.conditions(self.users))
+    logs=TimeEntry.includes(self.includes).joins(:issue).where(self.conditions(self.users, self.trackers))
        
        
     unless logs.empty?

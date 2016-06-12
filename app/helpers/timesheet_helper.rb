@@ -91,6 +91,13 @@ module TimesheetHelper
     options_from_collection_for_select(available_groups, :id, :name, :selected =>timesheet.groups)
   end
 
+  def tracker_options(timesheet)
+    available_trackers = Tracker.all
+    selected_trackers = timesheet.trackers
+    selected_trackers = available_trackers.collect{|g| g.id} if selected_trackers.blank?
+    options_from_collection_for_select(available_trackers, :id, :name, :selected =>timesheet.trackers)
+  end
+
   def user_options(timesheet)
     available_users = Timesheet.viewable_users.sort { |a,b| a.to_s.downcase <=> b.to_s.downcase }
     selected_users = timesheet.users
