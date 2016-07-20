@@ -73,8 +73,6 @@ class Timesheet
         tracker = Tracker.find(tracker_id)
         tracker.id if tracker
       end.flatten.uniq.compact
-    else
-      self.trackers =  Tracker.all.collect { |a| a.id.to_i }
     end
 
     if !options[:sort].nil? && options[:sort].respond_to?(:to_sym) && ValidSortOptions.keys.include?(options[:sort].to_sym)
@@ -249,40 +247,44 @@ class Timesheet
   # Array of users to find
   # String of extra conditions to add onto the query (AND)
   def conditions(users, trackers, extra_conditions=nil)
+    condition_str = []
+    condition_params = []
     if self.potential_time_entry_ids.empty?
-      if self.date_from.present? && self.date_to.present?
-        conditions = ["spent_on >= (:from) AND spent_on <= (:to) AND #{TimeEntry.table_name}.project_id IN (:projects) AND user_id IN (:users) AND activity_id IN (:activities) AND tracker_id IN (:trackers)",
-          {
-            :from => self.date_from,
-            :to => self.date_to,
-            :projects => self.projects,
-            :activities => self.activities,
-            :groups => self.groups,
-            :trackers => trackers,
-            :users => users
-          }]
-      else # All time
-        conditions = ["#{TimeEntry.table_name}.project_id IN (:projects) AND user_id IN (:users) AND activity_id IN (:activities) AND tracker_id IN (:trackers)",
-          {
-            :projects => self.projects,
-            :activities => self.activities,
-            :groups => self.groups,
-            :trackers => trackers,
-            :users => users
-          }]
+      if self.date_from.present?
+        condition_str << "spent_on >= ?"
+        condition_params << self.date_from
+      end
+      
+      if self.date_to.present?
+        condition_str << "spent_on <= ?"
+        condition_params << self.date_to
+      end
+      if self.projects.present?
+        condition_str << "#{TimeEntry.table_name}.project_id IN (?)"
+        condition_params << self.projects
+      end
+      if self.activities.present?
+        condition_str << "activity_id IN (?)"
+        condition_params << self.activities      
       end
     else
-      conditions = ["user_id IN (:users) AND #{TimeEntry.table_name}.id IN (:potential_time_entries)",
-        {
-          :users => users,
-          :potential_time_entries => self.potential_time_entry_ids
-        }]
+      condition_str << "#{TimeEntry.table_name}.id IN (?)"
+      condition_params << self.potential_time_entry_ids
     end
+    if users.present?
+      condition_str << "user_id IN (?)"
+      condition_params << users      
+    end
+    if trackers.present?
+      condition_str << "tracker_id IN (?)"
+      condition_params << trackers      
+    end     
 
     if extra_conditions
-      conditions[0] = conditions.first + ' AND ' + extra_conditions
+      condition_str << extra_conditions
     end
 
+    conditions = [condition_str.join(' AND ')].concat condition_params
     Redmine::Hook.call_hook(:plugin_timesheet_model_timesheet_conditions, { :timesheet => self, :conditions => conditions})
     return conditions
   end
