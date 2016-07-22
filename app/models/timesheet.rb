@@ -275,6 +275,7 @@ class Timesheet
       condition_str << "user_id IN (?)"
       condition_params << users      
     end
+
     if trackers.present?
       condition_str << "tracker_id IN (?)"
       condition_params << trackers      
@@ -299,51 +300,44 @@ class Timesheet
 
 
   def time_entries_for_all_users(project)
-    return project.time_entries.includes(self.includes + [{:issue => [:tracker]}]).
-      joins(:issue).
+    return project.time_entries.eager_load(self.includes).
       where(self.conditions(self.users, self.trackers)).
       order('spent_on ASC')
   end
 
   def time_entries_for_all_users_in_group(group)
-    return TimeEntry.includes(self.includes + [{:issue => [:tracker]}]).
-      joins(:issue).
+    return TimeEntry.eager_load(self.includes).
       where(self.conditions(group.user_ids, self.trackers)).
       order('spent_on ASC')
   end
 
   def time_entries_for_all_users_in_tracker(tracker)
-    return TimeEntry.includes(self.includes + [{:issue => [:tracker]}]).
-      joins(:issue).
+    return TimeEntry.eager_load(self.includes).
       where(self.conditions(self.users, tracker)).
       order('spent_on ASC')
   end
 
   def time_entries_for_current_user(project)
     return project.time_entries.
-      includes(self.includes + [:activity, :user, {:issue => [:tracker, :assigned_to, :priority]}]).
-      joins(:issue).
+      includes(self.includes).
       where(self.conditions(User.current.id, self.trackers)).
       order('spent_on ASC')
   end
 
   def time_entries_for_current_user_in_tracker(tracker)
-    return TimeEntry.includes(self.includes + [:activity, :user, {:issue => [:tracker, :assigned_to, :priority]}]).
-      joins(:issue).
+    return TimeEntry.eager_load(self.includes).
       where(self.conditions(User.current.id, tracker)).
       order('spent_on ASC')
   end
 
   def issue_time_entries_for_all_users(issue)
-    return issue.time_entries.includes(self.includes + [:activity, :user]).
-      joins(:issue).
+    return issue.time_entries.eager_load(self.includes).
       where(self.conditions(self.users, self.trackers)).
       order('spent_on ASC')
   end
 
   def issue_time_entries_for_current_user(issue)
-    return issue.time_entries.includes(self.includes + [:activity, :user]).
-      joins(:issue).
+    return issue.time_entries.eager_load(self.includes).
       where(self.conditions(User.current.id, self.trackers)).
       order('spent_on ASC')
   end
@@ -351,8 +345,7 @@ class Timesheet
   def time_entries_for_user(user, trackers, options={})
     extra_conditions = options.delete(:conditions)
 
-    return TimeEntry.includes(self.includes).
-      joins(:issue).
+    return TimeEntry.eager_load(self.includes).
       where(self.conditions([user], trackers, extra_conditions)).
       order('spent_on ASC')
   end
@@ -520,7 +513,7 @@ class Timesheet
     logs = []
 
     #           extra_conditions = 'GROUP_BY spent_on'
-    logs=TimeEntry.includes(self.includes).joins(:issue).where(self.conditions(self.users, self.trackers))
+    logs = TimeEntry.eager_load(self.includes).where(self.conditions(self.users, self.trackers))
        
        
     unless logs.empty?
