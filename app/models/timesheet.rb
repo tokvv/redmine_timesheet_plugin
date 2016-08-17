@@ -231,7 +231,7 @@ class Timesheet
       time_entry.id,
       time_entry.spent_on,
       time_entry.user.name,
-      time_entry.issue.tracker.name,
+      time_entry.issue && time_entry.issue.tracker.name,
       time_entry.activity.name,
       time_entry.project,
       (time_entry.issue.fixed_version if time_entry.issue),
