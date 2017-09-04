@@ -287,13 +287,13 @@ class Timesheet
 
     conditions = [condition_str.join(' AND ')].concat condition_params
     Redmine::Hook.call_hook(:plugin_timesheet_model_timesheet_conditions, { :timesheet => self, :conditions => conditions})
-    return conditions
+    conditions
   end
 
   def includes
     includes = [:activity, :user, :project, {:issue => [:tracker, :assigned_to, :priority]}]
     Redmine::Hook.call_hook(:plugin_timesheet_model_timesheet_includes, { :timesheet => self, :includes => includes})
-    return includes
+    includes
   end
 
   private
@@ -318,8 +318,7 @@ class Timesheet
   end
 
   def time_entries_for_current_user(project)
-    return project.time_entries.
-      includes(self.includes).
+    return project.time_entries.eager_load(self.includes).
       where(self.conditions(User.current.id, self.trackers)).
       order('spent_on ASC')
   end
@@ -362,7 +361,7 @@ class Timesheet
         # Users with the Role and correct permission can see all time entries
         logs = time_entries_for_all_users(project)
         users = logs.collect(&:user).uniq.sort
-      elsif User.current.allowed_to_on_single_potentially_archived_project?(:view_time_entries, project)
+      elsif User.current.allowed_to_on_single_potentially_archived_project?(:view_time_entries, project) && (self.users.empty? || self.users.include?(User.current.id)) 
         # Users with permission to see their time entries
         logs = time_entries_for_current_user(project)
         users = logs.collect(&:user).uniq.sort
@@ -440,16 +439,10 @@ class Timesheet
         logs = time_entries_for_all_users_in_tracker(tracker.id)
       else
         # Users with the Role and correct permission can see all time entries
-        logs1 = time_entries_for_all_users_in_tracker(tracker.id).select do |te|
+        logs = time_entries_for_all_users_in_tracker(tracker.id).select do |te|
           project = Project.find(te.project_id)
-          User.current.allowed_to_on_single_potentially_archived_project?(:see_project_timesheets, project)
+          User.current.allowed_to_on_single_potentially_archived_project?(:see_project_timesheets, project) || te.user_id == User.current.id
         end
-        # Users with permission to see their time entries
-        logs2 = time_entries_for_current_user_in_tracker(tracker.id).select do |te|
-          project = Project.find(te.project_id)
-          User.current.allowed_to_on_single_potentially_archived_project?(:view_time_entries, project)
-        end
-        logs = logs1 + logs2
       end
       unless logs.empty?
         users = logs.collect(&:user).uniq.sort
@@ -476,7 +469,7 @@ class Timesheet
         elsif User.current.allowed_to_on_single_potentially_archived_project?(:see_project_timesheets, project)
           # Users with the Role and correct permission can see all time entries
           logs << issue_time_entries_for_all_users(issue)
-        elsif User.current.allowed_to_on_single_potentially_archived_project?(:view_time_entries, project)
+        elsif User.current.allowed_to_on_single_potentially_archived_project?(:view_time_entries, project) && (self.users.empty? || self.users.include?(User.current.id)) 
           # Users with permission to see their time entries
           logs << issue_time_entries_for_current_user(issue)
         else
